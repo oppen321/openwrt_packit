@@ -1,0 +1,27 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天凌晨 00:00 UTC 时间同步一次，可以自行调整
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0 # 获取完整历史记录，否则可能导致同步冲突
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          
+      - name: Sync with upstream repository
+        run: |
+          git remote add upstream https://github.com/unifreq/openwrt_packit.git
+          git fetch upstream
+          git merge upstream/master
+          git push
